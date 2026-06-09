@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThirdEye Vitals — Team Dashboard</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --purple-deep:#2D1B69;
+    --purple-mid:#4A2C9E;
+    --purple-soft:#7B5EA7;
+    --purple-pale:#E8E0F5;
+    --purple-ghost:#F4F0FB;
+    --gold:#C9A84C;
+    --white:#FDFCFF;
+    --ink:#1A1025;
+    --muted:#6B5F7A;
+    --border:#DDD5EC;
+  }
+
+  * {
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+  }
+
+  body {
+    font-family:'Inter',sans-serif;
+    background:var(--purple-ghost);
+    color:var(--ink);
+    min-height:100vh;
+  }
+
+  header {
+    background:var(--purple-deep);
+    padding:18px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:2px solid var(--gold);
+  }
+
+  .header-left {
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .eye-mark {
+    width:42px;
+    height:42px;
+    background:var(--gold);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+  }
+
+  .brand-text h1 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:22px;
+    font-weight:600;
+    color:var(--white);
+    letter-spacing:0.04em;
+  }
+
+  .brand-text p {
+    font-size:10px;
+    color:var(--gold);
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    margin-top:1px;
+  }
+
+  .header-date {
+    font-size:12px;
+    color:var(--purple-pale);
+    letter-spacing:0.06em;
+    text-align:right;
+  }
+
+  .tabs {
+    display:flex;
+    background:var(--white);
+    border-bottom:1px solid var(--border);
+    padding:0 40px;
+  }
+
+  .tab {
+    padding:16px 24px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    border-bottom:2px solid transparent;
+    transition:all 0.2s;
+    letter-spacing:0.03em;
+  }
+
+  .tab:hover {
+    color:var(--purple-mid);
+  }
+
+  .tab.active {
+    color:var(--purple-deep);
+    border-bottom-color:var(--purple-mid);
+    font-weight:600;
+  }
+
+  .main {
+    max-width:1100px;
+    margin:0 auto;
+    padding:36px 24px;
+  }
+
+  .view {
+    display:none;
+  }
+
+  .view.active {
+    display:block;
+  }
+
+  .section-eyebrow {
+    font-size:10px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--purple-soft);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+
+  .section-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:28px;
+    font-weight:600;
+    color:var(--purple-deep);
+    margin-bottom:28px;
+  }
+
+  .card {
+    background:var(--white);
+    border-radius:14px;
+    border:1px solid var(--border);
+    padding:32px;
+    margin-bottom:24px;
+    box-shadow:0 2px 12px rgba(45,27,105,0.05);
+  }
+
+  .card-title {
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;
+    color:var(--purple-deep);
+    font-weight:600;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .card-title .dot {
+    width:8px;
+    height:8px;
+    background:var(--gold);
+    border-radius:50%;
+  }
+
+  .form-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+
+  .form-group {
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+
+  .form-group.full {
+    grid-column:1/-1;
+  }
+
+  label {
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  input,
+  select,
+  textarea {
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:10px 14px;
+    border:1.5px solid var(--border);
+    border-radius:8px;
+    color:var(--ink);
+    background:var(--white);
+    transition:border-color 0.2s;
+    outline:none;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color:var(--purple-mid);
+    box-shadow:0 0 0 3px rgba(74,44,158,0.08);
+  }
+
+  textarea {
+    resize:vertical;
+    min-height:90px;
+    line-height:1.6;
+  }
+
+  .photo-upload-area {
+    border:2px dashed var(--border);
+    border-radius:10px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
+    transition:all 0.2s;
+    background:var(--purple-ghost);
+    position:relative;
+  }
+
+  .photo-upload-area:hover {
+    border-color:var(--purple-soft);
+    background:var(--purple-pale);
+  }
+
+  .photo-upload-area input[type=file] {
+    position:absolute;
+    inset:0;
+    opacity:0;
+    cursor:pointer;
+    width:100%;
+    height:100%;
+  }
+
+  .photo-preview {
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid var(--gold);
+    display:none;
+    margin:0 auto 8px;
+  }
+
+  .photo-upload-icon {
+    font-size:28px;
+    margin-bottom:6px;
+  }
+
+  .photo-upload-text {
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .photo-upload-text strong {
+    color:var(--purple-mid);
+  }
+
+  .member-entry {
+    background:var(--purple-ghost);
+    border:1px solid var(--purple-pale);
+    border-radius:10px;
+    padding:20px;
+    margin-bottom:14px;
+    position:relative;
+  }
+
+  .member-entry .remove-btn {
+    position:absolute;
+    top:14px;
+    right:14px;
+    background:none;
+    border:none;
+    color:var(--muted);
+    cursor:pointer;
+    font-size:16px;
+    padding:4px;
+  }
+
+  .member-entry .remove-btn:hover {
+    color:#c0392b;
+  }
+
+  .btn {
+    padding:11px 22px;
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    border:none;
+    transition:all 0.2s;
+    letter-spacing:0.03em;
+  }
+
+  .btn-primary {
+    background:var(--purple-deep);
+    color:var(--white);
+  }
+
+  .btn-primary:hover {
+    background:var(--purple-mid);
+    transform:translateY(-1px);
+  }
+
+  .btn-outline {
+    background:transparent;
+    color:var(--purple-mid);
+    border:1.5px solid var(--purple-mid);
+  }
+
+  .btn-outline:hover {
+    background:var(--purple-ghost);
+  }
+
+  .btn-gold {
+    background:var(--gold);
+    color:var(--white);
+  }
+
+  .btn-gold:hover {
+    background:#b8953f;
+    transform:translateY(-1px);
+  }
+
+  .btn-sm {
+    padding:8px 16px;
+    font-size:12px;
+  }
+
+  .btn-row {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:20px;
+  }
+
+  .output-block {
+    background:var(--white);
+    border-radius:12px;
+    border:1px solid var(--border);
+    overflow:hidden;
+    margin-bottom:24px;
+  }
+
+  .output-header {
+    background:var(--purple-deep);
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  .output-header h3 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:17px;
+    color:var(--white);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+
+  .platform-badge {
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:4px 10px;
+    border-radius:20px;
+  }
+
+  .badge-linkedin {
+    background:#0077B5;
+    color:white;
+  }
+
+  .badge-substack {
+    background:var(--gold);
+    color:white;
+  }
+
+  .badge-image {
+    background:#7B5EA7;
+    color:white;
+  }
+
+  .output-body {
+    padding:24px;
+  }
+
+  .output-text {
+    font-size:14px;
+    line-height:1.75;
+    color:var(--ink);
+    white-space:pre-wrap;
+    font-family:'Inter',sans-serif;
+  }
+
+  .copy-btn {
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .loading {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:20px;
+    color:var(--muted);
+    font-size:14px;
+  }
+
+  .spinner {
+    width:20px;
+    height:20px;
+    border:2px solid var(--purple-pale);
+    border-top-color:var(--purple-mid);
+    border-radius:50%;
+    animation:spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform:rotate(360deg);
+    }
+  }
+
+  .submissions-list {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .submission-card {
+    background:var(--white);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px 24px;
+    display:flex;
+    align-items:flex-start;
+    gap:16px;
+  }
+
+  .avatar {
+    width:44px;
+    height:44px;
+    background:var(--purple-mid);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--white);
+    font-weight:700;
+    font-size:15px;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+
+  .avatar img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .submission-info h4 {
+    font-weight:600;
+    font-size:15px;
+    color:var(--purple-deep);
+    margin-bottom:2px;
+  }
+
+  .submission-info .role-tag {
+    font-size:11px;
+    color:var(--purple-soft);
+    font-weight:500;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+
+  .submission-info p {
+    font-size:13px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .status-dot {
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    margin-left:auto;
+    flex-shrink:0;
+    margin-top:6px;
+  }
+
+  .status-pending {
+    background:#f39c12;
+  }
+
+  .status-approved {
+    background:#2D6A4F;
+  }
+
+  .image-cards-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+
+  .image-card-wrap {
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .image-card-label {
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  canvas.preview-canvas {
+    width:100%;
+    border-radius:8px;
+    border:1px solid var(--border);
+    display:block;
+  }
+
+  .download-btn {
+    width:100%;
+    text-align:center;
+  }
+
+  .empty-state {
+    text-align:center;
+    padding:60px 20px;
+    color:var(--muted);
+  }
+
+  .empty-state .icon {
+    font-size:40px;
+    margin-bottom:12px;
+  }
+
+  .empty-state h3 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px;
+    color:var(--purple-soft);
+    margin-bottom:8px;
+  }
+
+  .empty-state p {
+    font-size:13px;
+  }
+
+  .divider {
+    height:1px;
+    background:var(--border);
+    margin:28px 0;
+  }
+
+  .toast {
+    position:fixed;
+    bottom:28px;
+    right:28px;
+    background:var(--purple-deep);
+    color:var(--white);
+    padding:14px 20px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:500;
+    box-shadow:0 8px 24px rgba(45,27,105,0.3);
+    transform:translateY(80px);
+    opacity:0;
+    transition:all 0.3s ease;
+    z-index:1000;
+    max-width:300px;
+    border-left:3px solid var(--gold);
+  }
+
+  .toast.show {
+    transform:translateY(0);
+    opacity:1;
+  }
+
+  @media(max-width:768px) {
+    header {
+      padding:14px 20px;
+    }
+
+    .tabs {
+      padding:0 16px;
+      overflow-x:auto;
+    }
+
+    .main {
+      padding:24px 16px;
+    }
+
+    .form-grid {
+      grid-template-columns:1fr;
+    }
+
+    .card {
+      padding:20px;
+    }
+
+    .image-cards-grid {
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="eye-mark">👁</div>
+    <div class="brand-text">
+      <h1>ThirdEye Vitals</h1>
+      <p>Team Dashboard</p>
+    </div>
+  </div>
+  <div class="header-date" id="headerDate"></div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('submit')">Submit Today's Update</div>
+  <div class="tab" onclick="switchTab('review')">Review Updates</div>
+  <div class="tab" onclick="switchTab('generate')">Generate Posts & Images</div>
+</div>
+
+<div class="main">
+
+  <div id="view-submit" class="view active">
+    <p class="section-eyebrow">Daily Log</p>
+    <h2 class="section-title">What did your team accomplish today?</h2>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Your Details</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="submitter-name" placeholder="e.g. Dr. Deepthi Kommagani">
+        </div>
+
+        <div class="form-group">
+          <label>Your Role</label>
+          <select id="submitter-role">
+            <option value="">Select role...</option>
+            <option>Founder & Chief Physician</option>
+            <option>Clinical Lead</option>
+            <option>Patient Safety Researcher</option>
+            <option>AI / Tech Lead</option>
+            <option>Program Coordinator</option>
+            <option>Student Innovator</option>
+            <option>Content & Communications</option>
+            <option>Operations</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Your Photo</label>
+          <div class="photo-upload-area" id="main-photo-area">
+            <input type="file" accept="image/*" onchange="handlePhotoUpload(this,'main-preview','main-photo-data')">
+            <img class="photo-preview" id="main-preview">
+            <div id="main-upload-ui">
+              <div class="photo-upload-icon">📸</div>
+              <div class="photo-upload-text">
+                Click to upload your photo<br>
+                <strong>Used in all image cards</strong>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" id="main-photo-data">
+        </div>
+
+        <div class="form-group full">
+          <label>What did you work on today?</label>
+          <textarea id="submitter-update" placeholder="Describe what you worked on — a program module, patient safety tool, research, student reviews, etc."></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label>Key outcome or milestone optional</label>
+          <input type="text" id="submitter-milestone" placeholder="e.g. Completed Week 2 module for LineGuard AI, reviewed 3 student submissions">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Team Members' Updates</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+        Add updates from other team members contributing today.
+      </p>
+      <div id="members-container"></div>
+      <button class="btn btn-outline btn-sm" onclick="addMember()">+ Add Team Member</button>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="submitUpdates()">Save Today's Updates →</button>
+      <span style="font-size:12px;color:var(--muted);">Saved privately for Dr. Deepthi's review</span>
+    </div>
+  </div>
+
+  <div id="view-review" class="view">
+    <p class="section-eyebrow">Dr. Deepthi's Review</p>
+    <h2 class="section-title">Today's team updates</h2>
+
+    <div id="review-list"></div>
+
+    <div id="review-actions" style="display:none;">
+      <div class="divider"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="approveAll()">Approve All & Generate Posts →</button>
+        <button class="btn btn-outline" onclick="switchTab('generate')">Go to Generate</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-generate" class="view">
+    <p class="section-eyebrow">AI Post + Image Generator</p>
+    <h2 class="section-title">Generate posts & branded image cards</h2>
+
+    <div class="card">
+      <div class="card-title"><span class="dot"></span>Post Settings</div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Post Focus</label>
+          <select id="post-focus">
+            <option value="combined">Combined team update</option>
+            <option value="individual">Individual member highlight</option>
+            <option value="milestone">Milestone / achievement</option>
+            <option value="program">Specific program update</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tone</label>
+          <select id="post-tone">
+            <option value="professional">Professional & inspiring</option>
+            <option value="personal">Personal & story-driven</option>
+            <option value="educational">Educational & informative</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>Additional context optional</label>
+          <input type="text" id="post-context" placeholder="e.g. We just launched our second cohort...">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateAll()">✦ Generate Posts + Images</button>
+      </div>
+    </div>
+
+    <div id="output-area"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let submissions = JSON.parse(localStorage.getItem('tev_submissions') || '[]');
+let memberCount = 0;
+
+const PURPLE = '#2D1B69';
+const GOLD = '#C9A84C';
+const WHITE = '#FDFCFF';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+
+  document.getElementById('headerDate').innerHTML =
+    now.toLocaleDateString('en-US', {
+      weekday:'long',
+      year:'numeric',
+      month:'long',
+      day:'numeric'
+    }) +
+    '<br><span style="font-size:10px;color:#C9A84C;letter-spacing:0.1em">INNOVATION STUDIO</span>';
+
+  renderReview();
+});
+
+function switchTab(name) {
+  const names = ['submit', 'review', 'generate'];
+
+  document.querySelectorAll('.tab').forEach((tab, index) => {
+    tab.classList.toggle('active', names[index] === name);
+  });
+
+  document.querySelectorAll('.view').forEach(view => {
+    view.classList.remove('active');
+  });
+
+  document.getElementById('view-' + name).classList.add('active');
+
+  if (name === 'review') {
+    renderReview();
+  }
+}
+
+function handlePhotoUpload(input, previewId, dataId) {
+  const file = input.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = event => {
+    const data = event.target.result;
+
+    document.getElementById(dataId).value = data;
+
+    const preview = document.getElementById(previewId);
+    preview.src = data;
+    preview.style.display = 'block';
+
+    const ui = input.parentElement.querySelector('[id$="-upload-ui"], #main-upload-ui');
+
+    if (ui) {
+      ui.style.display = 'none';
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function addMember() {
+  memberCount++;
+
+  const id = memberCount;
+  const div = document.createElement('div');
+
+  div.className = 'member-entry';
+  div.id = 'member-' + id;
+
+  div.innerHTML = `
+    <button class="remove-btn" onclick="document.getElementById('member-${id}').remove()">✕</button>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" id="m-name-${id}" placeholder="Team member name">
+      </div>
+
+      <div class="form-group">
+        <label>Role</label>
+        <select id="m-role-${id}">
+          <option value="">Select role...</option>
+          <option>Clinical Lead</option>
+          <option>Patient Safety Researcher</option>
+          <option>AI / Tech Lead</option>
+          <option>Program Coordinator</option>
+          <option>Student Innovator</option>
+          <option>Content & Communications</option>
+          <option>Operations</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-group full">
+        <label>Photo</label>
+        <div class="photo-upload-area">
+          <input type="file" accept="image/*" onchange="handlePhotoUpload(this,'m-preview-${id}','m-photo-${id}')">
+          <img class="photo-preview" id="m-preview-${id}">
+          <div id="m-upload-ui-${id}">
+            <div class="photo-upload-icon" style="font-size:20px;">📸</div>
+            <div class="photo-upload-text" style="font-size:11px;">Upload photo</div>
+          </div>
+        </div>
+        <input type="hidden" id="m-photo-${id}">
+      </div>
+
+      <div class="form-group full">
+        <label>Today's update</label>
+        <textarea id="m-update-${id}" placeholder="What did this person work on today?"></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label>Key outcome optional</label>
+        <input type="text" id="m-milestone-${id}" placeholder="Key milestone">
+      </div>
+    </div>
+  `;
+
+  document.getElementById('members-container').appendChild(div);
+}
+
+function submitUpdates() {
+  const name = document.getElementById('submitter-name').value.trim();
+  const role = document.getElementById('submitter-role').value;
+  const update = document.getElementById('submitter-update').value.trim();
+
+  if (!name || !role || !update) {
+    showToast('Please fill in name, role, and today\'s update.');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const entry = {
+    date: today,
+    timestamp: Date.now(),
+    members: [
+      {
+        name: name,
+        role: role,
+        update: update,
+        milestone: document.getElementById('submitter-milestone').value.trim(),
+        photo: document.getElementById('main-photo-data').value,
+        approved: false
+      }
+    ]
+  };
+
+  document.querySelectorAll('.member-entry').forEach(el => {
+    const id = el.id.split('-')[1];
+
+    const mName = document.getElementById('m-name-' + id)?.value.trim();
+    const mRole = document.getElementById('m-role-' + id)?.value;
+    const mUpdate = document.getElementById('m-update-' + id)?.value.trim();
+
+    if (mName && mRole && mUpdate) {
+      entry.members.push({
+        name: mName,
+        role: mRole,
+        update: mUpdate,
+        milestone: document.getElementById('m-milestone-' + id)?.value.trim() || '',
+        photo: document.getElementById('m-photo-' + id)?.value || '',
+        approved: false
+      });
+    }
+  });
+
+  submissions.push(entry);
+
+  localStorage.setItem('tev_submissions', JSON.stringify(submissions));
+
+  showToast('✓ Updates saved. Dr. Deepthi can review them now.');
+
+  setTimeout(() => {
+    switchTab('review');
+  }, 1200);
+}
+
+function renderReview() {
+  const container = document.getElementById('review-list');
+  const actions = document.getElementById('review-actions');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  const todayEntries = submissions.filter(submission => submission.date === today);
+
+  if (!todayEntries.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <h3>No updates yet today</h3>
+        <p>Ask team members to submit their daily updates first.</p>
+      </div>
+    `;
+
+    actions.style.display = 'none';
+    return;
+  }
+
+  actions.style.display = 'block';
+
+  const allMembers = todayEntries.flatMap(entry => entry.members);
+
+  container.innerHTML =
+    '<div class="submissions-list">' +
+    allMembers.map(member => `
+      <div class="submission-card">
+        <div class="avatar">
+          ${member.photo ? `<img src="${member.photo}">` : member.name.charAt(0).toUpperCase()}
+        </div>
+
+        <div class="submission-info">
+          <h4>${member.name}</h4>
+          <div class="role-tag">${member.role}</div>
+          <p>
+            ${member.update}
+            ${member.milestone ? `<br><strong>→ ${member.milestone}</strong>` : ''}
+          </p>
+        </div>
+
+        <div class="status-dot ${member.approved ? 'status-approved' : 'status-pending'}"></div>
+      </div>
+    `).join('') +
+    '</div>';
+}
+
+function approveAll() {
+  const today = new Date().toISOString().split('T')[0];
+
+  submissions.forEach(submission => {
+    if (submission.date === today) {
+      submission.members.forEach(member => {
+        member.approved = true;
+      });
+    }
+  });
+
+  localStorage.setItem('tev_submissions', JSON.stringify(submissions));
+
+  renderReview();
+
+  showToast('✓ All approved. Moving to generator...');
+
+  setTimeout(() => {
+    switchTab('generate');
+  }, 1200);
+}
+
+async function generateAll() {
+  const today = new Date().toISOString().split('T')[0];
+
+  const allMembers = submissions
+    .filter(submission => submission.date === today)
+    .flatMap(entry => entry.members);
+
+  if (!allMembers.length) {
+    showToast('No updates found. Please submit updates first.');
+    return;
+  }
+
+  const focus = document.getElementById('post-focus').value;
+  const tone = document.getElementById('post-tone').value;
+  const context = document.getElementById('post-context').value.trim();
+
+  const teamSummary = allMembers.map(member => {
+    return `- ${member.name} (${member.role}): ${member.update}${member.milestone ? ` | Milestone: ${member.milestone}` : ''}`;
+  }).join('\n');
+
+  const out = document.getElementById('output-area');
+
+  out.innerHTML = `
+    <div class="output-block">
+      <div class="output-header">
+        <h3>Generating...</h3>
+      </div>
+
+      <div class="loading">
+        <div class="spinner"></div>
+        Crafting LinkedIn post...
+      </div>
+    </div>
+  `;
+
+  const linkedinText = await callClaude(buildPrompt('linkedin', teamSummary, focus, tone, context));
+
+  out.innerHTML = `
+    <div class="output-block">
+      <div class="output-header">
+        <h3>📎 LinkedIn Post</h3>
+        <span class="platform-badge badge-linkedin">LinkedIn</span>
+      </div>
+
+      <div class="output-body">
+        <div class="output-text" id="linkedin-text">${linkedinText}</div>
+
+        <div class="copy-btn">
+          <button class="btn btn-outline btn-sm" onclick="copyText('linkedin-text')">Copy Post</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-block" id="substack-loading">
+      <div class="output-header">
+        <h3>Generating Substack post...</h3>
+      </div>
+
+      <div class="loading">
+        <div class="spinner"></div>
+        Writing Substack update...
+      </div>
+    </div>
+  `;
+
+  const substackText = await callClaude(buildPrompt('substack', teamSummary, focus, tone, context));
+
+  document.getElementById('substack-loading').outerHTML = `
+    <div class="output-block">
+      <div class="output-header">
+        <h3>✦ Substack Post</h3>
+        <span class="platform-badge badge-substack">Substack</span>
+      </div>
+
+      <div class="output-body">
+        <div class="output-text" id="substack-text">${substackText}</div>
+
+        <div class="copy-btn">
+          <button class="btn btn-outline btn-sm" onclick="copyText('substack-text')">Copy Post</button>
+          <button class="btn btn-gold btn-sm">Ready to Publish ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="output-block" id="images-loading">
+      <div class="output-header">
+        <h3>🎨 Branded Image Cards</h3>
+        <span class="platform-badge badge-image">Image Generator</span>
+      </div>
+
+      <div class="loading">
+        <div class="spinner"></div>
+        Drawing image cards for each team member...
+      </div>
+    </div>
+  `;
+
+  await generateImageCards(allMembers);
+}
+
+async function generateImageCards(members) {
+  const block = document.getElementById('images-loading');
+
+  if (!block) {
+    return;
+  }
+
+  let cardsHTML = '';
+
+  for (let i = 0; i < members.length; i++) {
+    const member = members[i];
+    const canvasId = 'canvas-member-' + i;
+    const safeName = member.name.replace(/\s+/g, '_');
+
+    cardsHTML += `
+      <div class="image-card-wrap">
+        <div class="image-card-label">${member.name}</div>
+
+        <canvas id="${canvasId}" class="preview-canvas" width="1080" height="1080" style="aspect-ratio:1;"></canvas>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="downloadCanvas('${canvasId}','${safeName}_square.png')">⬇ Square 1:1</button>
+          <button class="btn btn-outline btn-sm" onclick="downloadCanvasCover('${canvasId}','${safeName}_cover.png')">⬇ Cover 16:9</button>
+        </div>
+      </div>
+    `;
+  }
+
+  block.outerHTML = `
+    <div class="output-block">
+      <div class="output-header">
+        <h3>🎨 Branded Image Cards</h3>
+        <span class="platform-badge badge-image">Download Ready</span>
+      </div>
+
+      <div class="output-body">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+          One card per team member — download as square or 16:9 cover.
+        </p>
+
+        <div class="image-cards-grid" id="cards-grid">${cardsHTML}</div>
+      </div>
+    </div>
+  `;
+
+  for (let i = 0; i < members.length; i++) {
+    const canvas = document.getElementById('canvas-member-' + i);
+    await drawMemberCard(canvas, members[i]);
+  }
+}
+
+async function drawMemberCard(canvas, member) {
+  const ctx = canvas.getContext('2d');
+
+  const W = 1080;
+  const H = 1080;
+
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.fillStyle = PURPLE;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.globalAlpha = 0.07;
+  ctx.strokeStyle = WHITE;
+  ctx.lineWidth = 1.5;
+
+  const cx = 820;
+  const cy = 200;
+
+  [280, 220, 160, 100, 60, 30].forEach(radius => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+
+  for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle) * 30, cy + Math.sin(angle) * 30);
+    ctx.lineTo(cx + Math.cos(angle) * 280, cy + Math.sin(angle) * 280);
+    ctx.stroke();
+  }
+
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 40, 22, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 12, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+
+  ctx.fillStyle = GOLD;
+  ctx.fillRect(0, 0, W, 6);
+  ctx.fillRect(0, H - 6, W, 6);
+  ctx.fillRect(0, 0, 6, H);
+
+  ctx.strokeStyle = 'rgba(201,168,76,0.5)';
+  ctx.lineWidth = 3;
+
+  const b = 60;
+  const bl = 70;
+
+  ctx.beginPath();
+  ctx.moveTo(b, b + bl);
+  ctx.lineTo(b, b);
+  ctx.lineTo(b + bl, b);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(W - b, H - b - bl);
+  ctx.lineTo(W - b, H - b);
+  ctx.lineTo(W - b - bl, H - b);
+  ctx.stroke();
+
+  const photoX = 140;
+  const photoY = 170;
+  const photoR = 110;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, photoR, 0, Math.PI * 2);
+  ctx.clip();
+
+  if (member.photo) {
+    try {
+      const img = await loadImage(member.photo);
+      ctx.drawImage(img, photoX - photoR, photoY - photoR, photoR * 2, photoR * 2);
+    } catch (error) {
+      ctx.fillStyle = 'rgba(201,168,76,0.2)';
+      ctx.fillRect(photoX - photoR, photoY - photoR, photoR * 2, photoR * 2);
+    }
+  } else {
+    ctx.fillStyle = 'rgba(201,168,76,0.2)';
+    ctx.fillRect(photoX - photoR, photoY - photoR, photoR * 2, photoR * 2);
+
+    ctx.restore();
+    ctx.save();
+
+    ctx.fillStyle = GOLD;
+    ctx.font = 'bold 80px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(member.name.charAt(0).toUpperCase(), photoX, photoY);
+  }
+
+  ctx.restore();
+
+  ctx.strokeStyle = GOLD;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, photoR + 6, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = GOLD;
+  ctx.font = '500 28px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('THIRDEYE VITALS', 80, 40);
+
+  ctx.fillStyle = 'rgba(201,168,76,0.5)';
+  ctx.font = '300 20px Inter, sans-serif';
+  ctx.fillText('INNOVATION STUDIO', 80, 76);
+
+  ctx.fillStyle = WHITE;
+  ctx.font = '600 64px "Cormorant Garamond", serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+
+  const nameParts = member.name.split(' ');
+
+  if (nameParts.length > 2) {
+    ctx.fillText(nameParts.slice(0, -1).join(' '), 80, 310);
+    ctx.fillText(nameParts[nameParts.length - 1], 80, 380);
+  } else {
+    ctx.fillText(member.name, 80, 330);
+  }
+
+  const roleY = nameParts.length > 2 ? 460 : 420;
+  const roleWidth = Math.min(member.role.length * 16 + 40, 900);
+
+  ctx.fillStyle = 'rgba(201,168,76,0.18)';
+  roundRect(ctx, 80, roleY, roleWidth, 52, 26);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(201,168,76,0.5)';
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, 80, roleY, roleWidth, 52, 26);
+  ctx.stroke();
+
+  ctx.fillStyle = GOLD;
+  ctx.font = '500 24px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(member.role.toUpperCase(), 106, roleY + 26);
+
+  ctx.strokeStyle = 'rgba(201,168,76,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(80, roleY + 70);
+  ctx.lineTo(W - 80, roleY + 70);
+  ctx.stroke();
+
+  ctx.fillStyle = GOLD;
+  ctx.font = '600 20px Inter, sans-serif';
+  ctx.textBaseline = 'top';
+  ctx.fillText('TODAY', 80, roleY + 90);
+
+  ctx.fillStyle = 'rgba(253,252,255,0.82)';
+  ctx.font = '400 30px Inter, sans-serif';
+
+  const updateY = roleY + 128;
+  const maxW = W - 160;
+  const lines = wrapText(ctx, member.update, maxW);
+
+  lines.slice(0, 5).forEach((line, index) => {
+    ctx.fillText(line, 80, updateY + index * 44);
+  });
+
+  if (member.milestone) {
+    const milY = updateY + Math.min(lines.length, 5) * 44 + 20;
+
+    ctx.fillStyle = GOLD;
+    ctx.font = '500 26px Inter, sans-serif';
+    ctx.fillText('→ ' + member.milestone, 80, milY);
+  }
+
+  const dateStr = new Date().toLocaleDateString('en-US', {
+    month:'long',
+    day:'numeric',
+    year:'numeric'
+  });
+
+  ctx.fillStyle = 'rgba(201,168,76,0.5)';
+  ctx.font = '300 22px Inter, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(dateStr, W / 2, H - 28);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const words = text.split(' ');
+  const lines = [];
+  let current = '';
+
+  words.forEach(word => {
+    const test = current ? current + ' ' + word : word;
+
+    if (ctx.measureText(test).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = test;
+    }
+  });
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines;
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+
+    img.src = src;
+  });
+}
+
+function downloadCanvas(canvasId, filename) {
+  const canvas = document.getElementById(canvasId);
+
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function downloadCanvasCover(canvasId, filename) {
+  const srcCanvas = document.getElementById(canvasId);
+
+  const dst = document.createElement('canvas');
+  dst.width = 1280;
+  dst.height = 720;
+
+  const ctx = dst.getContext('2d');
+  ctx.drawImage(srcCanvas, 0, 0, 1280, 720);
+
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dst.toDataURL('image/png');
+  link.click();
+}
+
+function buildPrompt(platform, teamSummary, focus, tone, context) {
+  const toneMap = {
+    professional: 'professional, authoritative, and inspiring',
+    personal: 'personal, warm, and story-driven — in Dr. Deepthi\'s voice as founder',
+    educational: 'educational, informative, and thought-provoking'
+  };
+
+  const focusMap = {
+    combined: 'a combined team update showcasing collective progress',
+    individual: 'highlighting individual team member contributions and their unique roles',
+    milestone: 'celebrating a key milestone or achievement',
+    program: 'an update about a specific ThirdEye Vitals program'
+  };
+
+  if (platform === 'linkedin') {
+    return `You are the social media voice of ThirdEye Vitals, a doctor-founded healthcare innovation studio in India. Founder: Dr. Deepthi Kommagani — BHMS Physician, Healthcare Analytics RMU, AHN Internship, CPHQ-track, JHF Patient Safety Fellow. ThirdEye Vitals runs 8 one-month programs where students build real patient safety tools that reach hospitals.
+
+Write a LinkedIn post — ${toneMap[tone]}, focused on ${focusMap[focus]}.
+
+Team updates:
+${teamSummary}${context ? '\nContext: ' + context : ''}
+
+Requirements:
+- Hook opening
+- Do not start with "Excited to share"
+- 150 to 250 words
+- Mention specific roles and work done
+- End with reflection or CTA
+- Include hashtags: #PatientSafety #HealthcareInnovation #ThirdEyeVitals plus 2 to 3 more
+- Write ready to copy and paste.`;
+  }
+
+  return `You are writing for ThirdEye Vitals' Substack newsletter. Readers: students interested in healthcare innovation, patient safety professionals, and clinicians.
+
+Write a Substack update — ${toneMap[tone]}, focused on ${focusMap[focus]}.
+
+Team updates:
+${teamSummary}${context ? '\nContext: ' + context : ''}
+
+Requirements:
+- Title at top with prefix "Title: "
+- 300 to 450 words
+- Thoughtful editorial voice
+- Explain team roles and why each matters
+- Reference today's specific work
+- Close by making reader feel part of the mission
+- No hashtags
+- Write ready to copy and paste.`;
+}
+
+async function callClaude(prompt) {
+  try {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt: prompt })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('AI generation error:', data);
+      return data.error || 'Error generating AI content. Please try again.';
+    }
+
+    return data.text || 'Could not generate. Please try again.';
+  } catch (error) {
+    console.error('Network error:', error);
+    return 'Error connecting to AI. Please check your connection.';
+  }
+}
+
+function copyText(id) {
+  const text = document.getElementById(id)?.innerText;
+
+  if (!text) {
+    return;
+  }
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✓ Copied to clipboard!');
+  });
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+
+  toast.textContent = message;
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
+}
+</script>
+
+</body>
+</html>
