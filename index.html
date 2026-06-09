@@ -99,6 +99,7 @@
     border-bottom:2px solid transparent;
     transition:all 0.2s;
     letter-spacing:0.03em;
+    white-space:nowrap;
   }
 
   .tab:hover {
@@ -410,6 +411,10 @@
     color:var(--ink);
     white-space:pre-wrap;
     font-family:'Inter',sans-serif;
+    background:var(--purple-ghost);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
   }
 
   .copy-btn {
@@ -547,11 +552,6 @@
     display:block;
   }
 
-  .download-btn {
-    width:100%;
-    text-align:center;
-  }
-
   .empty-state {
     text-align:center;
     padding:60px 20px;
@@ -643,13 +643,14 @@
       <p>Team Dashboard</p>
     </div>
   </div>
+
   <div class="header-date" id="headerDate"></div>
 </header>
 
 <div class="tabs">
   <div class="tab active" onclick="switchTab('submit')">Submit Today's Update</div>
   <div class="tab" onclick="switchTab('review')">Review Updates</div>
-  <div class="tab" onclick="switchTab('generate')">Generate Posts & Images</div>
+  <div class="tab" onclick="switchTab('generate')">Generate Prompt & Images</div>
 </div>
 
 <div class="main">
@@ -659,7 +660,10 @@
     <h2 class="section-title">What did your team accomplish today?</h2>
 
     <div class="card">
-      <div class="card-title"><span class="dot"></span>Your Details</div>
+      <div class="card-title">
+        <span class="dot"></span>
+        Your Details
+      </div>
 
       <div class="form-grid">
         <div class="form-group">
@@ -688,14 +692,16 @@
           <div class="photo-upload-area" id="main-photo-area">
             <input type="file" accept="image/*" onchange="handlePhotoUpload(this,'main-preview','main-photo-data')">
             <img class="photo-preview" id="main-preview">
+
             <div id="main-upload-ui">
               <div class="photo-upload-icon">📸</div>
               <div class="photo-upload-text">
                 Click to upload your photo<br>
-                <strong>Used in all image cards</strong>
+                <strong>Used in image cards</strong>
               </div>
             </div>
           </div>
+
           <input type="hidden" id="main-photo-data">
         </div>
 
@@ -712,41 +718,51 @@
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="dot"></span>Team Members' Updates</div>
+      <div class="card-title">
+        <span class="dot"></span>
+        Team Members' Updates
+      </div>
+
       <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
         Add updates from other team members contributing today.
       </p>
+
       <div id="members-container"></div>
+
       <button class="btn btn-outline btn-sm" onclick="addMember()">+ Add Team Member</button>
     </div>
 
     <div class="btn-row">
       <button class="btn btn-primary" onclick="submitUpdates()">Save Today's Updates →</button>
-      <span style="font-size:12px;color:var(--muted);">Saved privately for Dr. Deepthi's review</span>
+      <span style="font-size:12px;color:var(--muted);">Saved privately in this browser</span>
     </div>
   </div>
 
   <div id="view-review" class="view">
-    <p class="section-eyebrow">Dr. Deepthi's Review</p>
+    <p class="section-eyebrow">Review</p>
     <h2 class="section-title">Today's team updates</h2>
 
     <div id="review-list"></div>
 
     <div id="review-actions" style="display:none;">
       <div class="divider"></div>
+
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="approveAll()">Approve All & Generate Posts →</button>
+        <button class="btn btn-primary" onclick="approveAll()">Approve All & Generate Prompt →</button>
         <button class="btn btn-outline" onclick="switchTab('generate')">Go to Generate</button>
       </div>
     </div>
   </div>
 
   <div id="view-generate" class="view">
-    <p class="section-eyebrow">AI Post + Image Generator</p>
-    <h2 class="section-title">Generate posts & branded image cards</h2>
+    <p class="section-eyebrow">Free Post + Image Generator</p>
+    <h2 class="section-title">Generate ChatGPT prompt & branded image cards</h2>
 
     <div class="card">
-      <div class="card-title"><span class="dot"></span>Post Settings</div>
+      <div class="card-title">
+        <span class="dot"></span>
+        Post Settings
+      </div>
 
       <div class="form-grid">
         <div class="form-group">
@@ -775,7 +791,7 @@
       </div>
 
       <div class="btn-row">
-        <button class="btn btn-primary" onclick="generateAll()">✦ Generate Posts + Images</button>
+        <button class="btn btn-primary" onclick="generateAll()">✦ Generate ChatGPT Prompt + Images</button>
       </div>
     </div>
 
@@ -966,11 +982,11 @@ function submitUpdates() {
 
   localStorage.setItem('tev_submissions', JSON.stringify(submissions));
 
-  showToast('✓ Updates saved. Dr. Deepthi can review them now.');
+  showToast('✓ Updates saved.');
 
   setTimeout(() => {
     switchTab('review');
-  }, 1200);
+  }, 900);
 }
 
 function renderReview() {
@@ -1040,7 +1056,7 @@ function approveAll() {
 
   setTimeout(() => {
     switchTab('generate');
-  }, 1200);
+  }, 900);
 }
 
 async function generateAll() {
@@ -1063,66 +1079,26 @@ async function generateAll() {
     return `- ${member.name} (${member.role}): ${member.update}${member.milestone ? ` | Milestone: ${member.milestone}` : ''}`;
   }).join('\n');
 
+  const prompt = buildManualChatGPTPrompt(teamSummary, focus, tone, context);
+
   const out = document.getElementById('output-area');
 
   out.innerHTML = `
     <div class="output-block">
       <div class="output-header">
-        <h3>Generating...</h3>
-      </div>
-
-      <div class="loading">
-        <div class="spinner"></div>
-        Crafting LinkedIn post...
-      </div>
-    </div>
-  `;
-
-  const linkedinText = await callClaude(buildPrompt('linkedin', teamSummary, focus, tone, context));
-
-  out.innerHTML = `
-    <div class="output-block">
-      <div class="output-header">
-        <h3>📎 LinkedIn Post</h3>
-        <span class="platform-badge badge-linkedin">LinkedIn</span>
+        <h3>🤖 ChatGPT Prompt</h3>
+        <span class="platform-badge badge-linkedin">Copy Prompt</span>
       </div>
 
       <div class="output-body">
-        <div class="output-text" id="linkedin-text">${linkedinText}</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+          Copy this prompt and paste it into ChatGPT. This keeps your website free and avoids paid API keys.
+        </p>
+
+        <div class="output-text" id="manual-prompt">${escapeHtml(prompt)}</div>
 
         <div class="copy-btn">
-          <button class="btn btn-outline btn-sm" onclick="copyText('linkedin-text')">Copy Post</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="output-block" id="substack-loading">
-      <div class="output-header">
-        <h3>Generating Substack post...</h3>
-      </div>
-
-      <div class="loading">
-        <div class="spinner"></div>
-        Writing Substack update...
-      </div>
-    </div>
-  `;
-
-  const substackText = await callClaude(buildPrompt('substack', teamSummary, focus, tone, context));
-
-  document.getElementById('substack-loading').outerHTML = `
-    <div class="output-block">
-      <div class="output-header">
-        <h3>✦ Substack Post</h3>
-        <span class="platform-badge badge-substack">Substack</span>
-      </div>
-
-      <div class="output-body">
-        <div class="output-text" id="substack-text">${substackText}</div>
-
-        <div class="copy-btn">
-          <button class="btn btn-outline btn-sm" onclick="copyText('substack-text')">Copy Post</button>
-          <button class="btn btn-gold btn-sm">Ready to Publish ✓</button>
+          <button class="btn btn-outline btn-sm" onclick="copyText('manual-prompt')">Copy ChatGPT Prompt</button>
         </div>
       </div>
     </div>
@@ -1141,6 +1117,61 @@ async function generateAll() {
   `;
 
   await generateImageCards(allMembers);
+}
+
+function buildManualChatGPTPrompt(teamSummary, focus, tone, context) {
+  const toneMap = {
+    professional: 'professional, authoritative, and inspiring',
+    personal: 'personal, warm, and story-driven — in Dr. Deepthi’s voice as founder',
+    educational: 'educational, informative, and thought-provoking'
+  };
+
+  const focusMap = {
+    combined: 'a combined team update showcasing collective progress',
+    individual: 'highlighting individual team member contributions and their unique roles',
+    milestone: 'celebrating a key milestone or achievement',
+    program: 'an update about a specific ThirdEye Vitals program'
+  };
+
+  return `You are the social media and newsletter writer for ThirdEye Vitals, a doctor-founded healthcare innovation studio in India.
+
+Founder: Dr. Deepthi Kommagani — BHMS Physician, Healthcare Analytics RMU, AHN Internship, CPHQ-track, JHF Patient Safety Fellow.
+
+ThirdEye Vitals runs one-month healthcare innovation programs where students build real patient safety tools that can reach hospitals.
+
+Please generate two things:
+
+1. A LinkedIn post
+2. A Substack newsletter update
+
+Tone:
+${toneMap[tone]}
+
+Focus:
+${focusMap[focus]}
+
+Team updates:
+${teamSummary}
+
+${context ? `Additional context:\n${context}` : ''}
+
+LinkedIn requirements:
+- Start with a strong hook
+- Do not start with "Excited to share"
+- 150 to 250 words
+- Mention specific roles and work completed
+- End with a reflection or call to action
+- Include hashtags: #PatientSafety #HealthcareInnovation #ThirdEyeVitals plus 2 to 3 more
+
+Substack requirements:
+- Start with a title using "Title:"
+- 300 to 450 words
+- Thoughtful editorial voice
+- Explain why each team member’s work matters
+- Reference today’s specific progress
+- Close by making the reader feel part of the mission
+
+Make both ready to copy and paste.`;
 }
 
 async function generateImageCards(members) {
@@ -1457,80 +1488,6 @@ function downloadCanvasCover(canvasId, filename) {
   link.click();
 }
 
-function buildPrompt(platform, teamSummary, focus, tone, context) {
-  const toneMap = {
-    professional: 'professional, authoritative, and inspiring',
-    personal: 'personal, warm, and story-driven — in Dr. Deepthi\'s voice as founder',
-    educational: 'educational, informative, and thought-provoking'
-  };
-
-  const focusMap = {
-    combined: 'a combined team update showcasing collective progress',
-    individual: 'highlighting individual team member contributions and their unique roles',
-    milestone: 'celebrating a key milestone or achievement',
-    program: 'an update about a specific ThirdEye Vitals program'
-  };
-
-  if (platform === 'linkedin') {
-    return `You are the social media voice of ThirdEye Vitals, a doctor-founded healthcare innovation studio in India. Founder: Dr. Deepthi Kommagani — BHMS Physician, Healthcare Analytics RMU, AHN Internship, CPHQ-track, JHF Patient Safety Fellow. ThirdEye Vitals runs 8 one-month programs where students build real patient safety tools that reach hospitals.
-
-Write a LinkedIn post — ${toneMap[tone]}, focused on ${focusMap[focus]}.
-
-Team updates:
-${teamSummary}${context ? '\nContext: ' + context : ''}
-
-Requirements:
-- Hook opening
-- Do not start with "Excited to share"
-- 150 to 250 words
-- Mention specific roles and work done
-- End with reflection or CTA
-- Include hashtags: #PatientSafety #HealthcareInnovation #ThirdEyeVitals plus 2 to 3 more
-- Write ready to copy and paste.`;
-  }
-
-  return `You are writing for ThirdEye Vitals' Substack newsletter. Readers: students interested in healthcare innovation, patient safety professionals, and clinicians.
-
-Write a Substack update — ${toneMap[tone]}, focused on ${focusMap[focus]}.
-
-Team updates:
-${teamSummary}${context ? '\nContext: ' + context : ''}
-
-Requirements:
-- Title at top with prefix "Title: "
-- 300 to 450 words
-- Thoughtful editorial voice
-- Explain team roles and why each matters
-- Reference today's specific work
-- Close by making reader feel part of the mission
-- No hashtags
-- Write ready to copy and paste.`;
-}
-
-async function callClaude(prompt) {
-  try {
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ prompt: prompt })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('AI generation error:', data);
-      return data.error || 'Error generating AI content. Please try again.';
-    }
-
-    return data.text || 'Could not generate. Please try again.';
-  } catch (error) {
-    console.error('Network error:', error);
-    return 'Error connecting to AI. Please check your connection.';
-  }
-}
-
 function copyText(id) {
   const text = document.getElementById(id)?.innerText;
 
@@ -1552,6 +1509,15 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.remove('show');
   }, 3000);
+}
+
+function escapeHtml(text) {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 </script>
 
